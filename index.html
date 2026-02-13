@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #fce4ec;
+            height: 100vh;
+            font-family: sans-serif;
+        }
+
+        #garden {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            text-align: center;
+            color: #ad1457;
+            pointer-events: none;
+            letter-spacing: 2px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .flower-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateX(-50%);
+        }
+
+        .flower-head {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            z-index: 2;
+            animation: sway 5s ease-in-out infinite;
+        }
+
+        .stem {
+            width: 4px;
+            background: linear-gradient(to bottom, #7cb342, #558b2f);
+            height: 0;
+            /* Negative margin pulls the stem up to touch the heart tip */
+            margin-top: -12px; 
+            border-radius: 2px;
+            animation: growStem 1s ease-out forwards;
+        }
+
+        .center-bud {
+            width: 12px;
+            height: 12px;
+            background: #d32f2f;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(211, 47, 47, 0.5);
+        }
+
+        .petal {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            animation: bloom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes growStem {
+            to { height: 180px; }
+        }
+
+        @keyframes bloom {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="instructions">CLICK TO GROW  FLOWERS</div>
+    <div id="garden"></div>
+
+    <script>
+        const garden = document.getElementById('garden');
+
+        garden.addEventListener('click', (e) => {
+            if(e.target === garden) createFlower(e.clientX, e.clientY);
+        });
+
+        function createFlower(x, y) {
+            const container = document.createElement('div');
+            container.className = 'flower-container';
+            container.style.left = `${x}px`;
+            container.style.top = `${y - 230}px`;
+
+            const head = document.createElement('div');
+            head.className = 'flower-head';
+
+            const petalCount = 24; 
+            const hue = Math.floor(Math.random() * 20) + 340; 
+            const scale = 3.5; 
+
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                
+                const t = (i / petalCount) * (2 * Math.PI);
+                
+                // Math for Heart Curve
+                const px = 16 * Math.pow(Math.sin(t), 3);
+                // The -2.5 offset shifts the heart down so the "V" is at the bottom center
+                const py = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t) - 2.5);
+
+                const pSize = 15 + Math.random() * 5;
+                petal.style.width = `${pSize}px`;
+                petal.style.height = `${pSize}px`;
+                petal.style.backgroundColor = `hsl(${hue}, 85%, 75%)`;
+                
+                // Centering math
+                petal.style.left = `calc(50% + ${px * scale}px - ${pSize/2}px)`;
+                petal.style.top = `calc(50% + ${py * scale}px - ${pSize/2}px)`;
+                
+                petal.style.animationDelay = `${i * 0.03}s`;
+                head.appendChild(petal);
+            }
+
+            const bud = document.createElement('div');
+            bud.className = 'center-bud';
+            head.appendChild(bud);
+
+            const stem = document.createElement('div');
+            stem.className = 'stem';
+
+            container.appendChild(head);
+            container.appendChild(stem);
+            garden.appendChild(container);
+
+            head.addEventListener('click', () => {
+                container.style.transition = '0.4s';
+                container.style.opacity = '0';
+                container.style.transform = 'translateX(-50%) scale(0)';
+                setTimeout(() => container.remove(), 400);
+            });
+        }
+    </script>
+</body>
+</html>
